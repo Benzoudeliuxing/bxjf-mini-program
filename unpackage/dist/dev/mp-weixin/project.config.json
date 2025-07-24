@@ -7,14 +7,13 @@
     "urlCheck": false,
     "es6": true,
     "postcss": false,
-    "minified": false,
+    "minified": true,
     "newFeature": true,
-    "bigPackageSizeSupport": true,
-    "minifyWXML": true
+    "bigPackageSizeSupport": true
   },
   "compileType": "miniprogram",
   "libVersion": "",
-  "appid": "wxef3d514bdec71886",
+  "appid": "touristappid",
   "projectname": "bxjf-mini-program",
   "condition": {
     "search": {

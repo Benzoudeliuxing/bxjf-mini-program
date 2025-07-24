@@ -9,11 +9,10 @@
     <view class="content">
       <button
         class="login-btn"
-        type="primary"
-        @click="handleWechatLogin"
-        :loading="isLoading"
+        open-type="getPhoneNumber"
+        @getphonenumber="getPhoneNumber"
       >
-        <text class="btn-text">微信授权登录</text>
+        微信授权登录
       </button>
 
       <view class="tips">
@@ -69,13 +68,20 @@ export default {
     };
   },
   methods: {
+    // 获取手机号回调
+    getPhoneNumber(e) {
+      console.log(e);
+      const phoneCode = e.detail.code;
+      this.handleWechatLogin(phoneCode);
+    },
+
     // 微信授权登录
-    async handleWechatLogin() {
+    async handleWechatLogin(phoneCode) {
       this.isLoading = true;
 
       try {
         // 获取用户信息
-        const userInfo = await Auth.wechatLogin();
+        const userInfo = await Auth.wechatLogin(phoneCode);
 
         if (userInfo) {
           this.userInfo = userInfo;
@@ -158,9 +164,7 @@ export default {
 
       // 延迟跳转到首页
       setTimeout(() => {
-        uni.switchTab({
-          url: "/pages/index/index",
-        });
+        uni.reLaunch({ url: "/pages/index/index" });
       }, 1500);
     },
   },
@@ -168,7 +172,7 @@ export default {
   onLoad() {
     // 检查是否已登录
     if (Auth.isLoggedIn()) {
-      uni.switchTab({
+      uni.reLaunch({
         url: "/pages/index/index",
       });
     }

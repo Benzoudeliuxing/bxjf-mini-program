@@ -10,9 +10,9 @@
         ></image>
       </view>
       <view class="user-details">
-        <text class="user-name">{{ userInfo.nickName || "未设置昵称" }}</text>
+        <text class="user-name">{{ userInfo.nickname || "未设置昵称" }}</text>
         <text class="user-desc">{{
-          userInfo.nickName ? "已登录" : "请先登录"
+          userInfo.nickname ? "已登录" : "请先登录"
         }}</text>
       </view>
       <view class="user-actions">
@@ -32,18 +32,6 @@
 
     <!-- 功能菜单 -->
     <view class="menu-section">
-      <view class="menu-item" @click="handleMenuClick('profile')">
-        <view class="menu-icon">👤</view>
-        <text class="menu-text">个人资料</text>
-        <text class="menu-arrow">></text>
-      </view>
-
-      <view class="menu-item" @click="handleMenuClick('settings')">
-        <view class="menu-icon">⚙️</view>
-        <text class="menu-text">设置</text>
-        <text class="menu-arrow">></text>
-      </view>
-
       <view class="menu-item" @click="handleMenuClick('about')">
         <view class="menu-icon">ℹ️</view>
         <text class="menu-text">关于我们</text>
@@ -113,18 +101,6 @@ export default {
       }
 
       switch (type) {
-        case "profile":
-          uni.showToast({
-            title: "个人资料功能开发中",
-            icon: "none",
-          });
-          break;
-        case "settings":
-          uni.showToast({
-            title: "设置功能开发中",
-            icon: "none",
-          });
-          break;
         case "about":
           uni.showModal({
             title: "关于我们",

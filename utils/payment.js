@@ -2,6 +2,9 @@
  * 支付工具类
  */
 
+import { wechatApi, paymentApi } from "./api.js";
+import api from "./api.js";
+
 // 微信支付配置
 const WECHAT_PAY_CONFIG = {
   // 这里需要配置您的微信支付参数
@@ -15,33 +18,19 @@ const WECHAT_PAY_CONFIG = {
  * @param {Object} orderInfo 订单信息
  * @returns {Promise} 支付参数
  */
-export function getWechatPayParams(orderInfo) {
-  return new Promise((resolve, reject) => {
-    // 调用后端API获取微信支付参数
-    uni.request({
-      url: "YOUR_API_BASE_URL/api/payment/wechat/create",
-      method: "POST",
-      data: {
-        orderId: orderInfo.orderId,
-        amount: orderInfo.amount,
-        description: orderInfo.description || "商品购买",
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + uni.getStorageSync("token"),
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
-          resolve(res.data.data);
-        } else {
-          reject(new Error(res.data.message || "获取支付参数失败"));
-        }
-      },
-      fail: (err) => {
-        reject(new Error("网络请求失败"));
-      },
-    });
-  });
+export async function getWechatPayParams(orderInfo) {
+  try {
+    // 确保orderId为整数类型
+    const paymentData = {
+      ...orderInfo,
+      orderId: parseInt(orderInfo.orderId),
+    };
+
+    const result = await api.payment.createPayment(paymentData);
+    return result.data;
+  } catch (error) {
+    throw new Error(error.message || "获取支付参数失败");
+  }
 }
 
 /**
@@ -79,30 +68,15 @@ export function requestWechatPayment(payParams) {
  * @param {Object} orderInfo 订单信息
  * @returns {Promise} 验证结果
  */
-export function verifyPaymentResult(orderInfo) {
-  return new Promise((resolve, reject) => {
-    uni.request({
-      url: "YOUR_API_BASE_URL/api/payment/verify",
-      method: "POST",
-      data: {
-        orderId: orderInfo.orderId,
-      },
-      header: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + uni.getStorageSync("token"),
-      },
-      success: (res) => {
-        if (res.statusCode === 200 && res.data.success) {
-          resolve(res.data.data);
-        } else {
-          reject(new Error(res.data.message || "验证支付结果失败"));
-        }
-      },
-      fail: (err) => {
-        reject(new Error("网络请求失败"));
-      },
+export async function verifyPaymentResult(orderInfo) {
+  try {
+    const result = await paymentApi.verifyPayment({
+      orderId: parseInt(orderInfo.orderId),
     });
-  });
+    return result.data;
+  } catch (error) {
+    throw new Error(error.message || "验证支付结果失败");
+  }
 }
 
 /**
