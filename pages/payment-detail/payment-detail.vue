@@ -84,6 +84,10 @@
         <view class="section-title">支付信息</view>
         <view class="info-list">
           <view class="info-item">
+            <text class="label">订单编号</text>
+            <text class="value">{{ orderDetail.orderNo || "-" }}</text>
+          </view>
+          <view class="info-item">
             <text class="label">支付金额</text>
             <text class="value amount-text">¥{{ orderDetail.payPrice }}</text>
           </view>

@@ -6,10 +6,8 @@
 // 请求配置
 const config = {
   // 基础URL，根据环境自动切换
-  baseURL:
-    process.env.NODE_ENV === "development"
-      ? "http://192.168.11.111:8080"
-      : "https://your-api-domain.com",
+  // baseURL:"http://192.168.11.111:8080",
+  baseURL: "https://bxgm.cklock.cn",
 
   // 请求超时时间60s
   timeout: 60000,

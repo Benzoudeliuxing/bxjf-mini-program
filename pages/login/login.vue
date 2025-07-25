@@ -3,7 +3,7 @@
     <view class="header">
       <image class="logo" src="/static/logo.jpg" mode="aspectFit"></image>
       <text class="title">欢迎使用 学平险采集小程序</text>
-      <text class="subtitle">请授权登录以使用完整功能</text>
+      <!-- <text class="subtitle">请授权登录以使用完整功能</text> -->
     </view>
 
     <view class="content">
