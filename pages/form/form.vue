@@ -120,7 +120,7 @@
       </view>
 
       <!-- 快速填写按钮 -->
-      <view class="quick-fill-section">
+      <view class="quick-fill-section" v-if="false">
         <button class="quick-fill-btn" @click="quickFill">
           快速填写测试数据
         </button>
@@ -156,7 +156,7 @@ export default {
         bbAddress: "",
         bbSchool: "",
         bbClass: "",
-        payPrice: "1",
+        payPrice: "100",
         openid: "",
       },
     };
@@ -264,7 +264,7 @@ export default {
         bbAddress: "北京市朝阳区朝阳路456号",
         bbSchool: "北京市第一中学",
         bbClass: "高三(1)班",
-        payPrice: "1",
+        payPrice: "0.01",
         openid: currentOpenid, // 保持openid不变
       };
 

@@ -21,7 +21,7 @@
     {
       "path": "pages/form/form",
       "style": {
-        "navigationBarTitleText": "表单页面"
+        "navigationBarTitleText": "创建订单"
       }
     },
     {
@@ -31,21 +31,21 @@
       }
     },
     {
-      "path": "pages/payment-success/payment-success",
-      "style": {
-        "navigationBarTitleText": "支付成功"
-      }
-    },
-    {
       "path": "pages/payment-record/payment-record",
       "style": {
-        "navigationBarTitleText": "缴费记录"
+        "navigationBarTitleText": "保险订单记录"
       }
     },
     {
       "path": "pages/payment-detail/payment-detail",
       "style": {
-        "navigationBarTitleText": "缴费详情"
+        "navigationBarTitleText": "保险订单详情"
+      }
+    },
+    {
+      "path": "pages/privacy/privacy",
+      "style": {
+        "navigationBarTitleText": "隐私协议"
       }
     }
   ],

@@ -37,30 +37,6 @@ export const paymentApi = {
   createPayment(params) {
     return request.get(API_CONFIG.payment.create, params);
   },
-
-  /**
-   * 验证支付结果
-   * @param {Object} data 验证数据
-   */
-  verifyPayment(data) {
-    return request.post(API_CONFIG.payment.verify, data);
-  },
-
-  /**
-   * 获取支付记录列表
-   * @param {Object} params 查询参数
-   */
-  getPaymentList(params = {}) {
-    return request.get(API_CONFIG.payment.list, params);
-  },
-
-  /**
-   * 获取支付详情
-   * @param {String} id 支付ID
-   */
-  getPaymentDetail(id) {
-    return request.get(`${API_CONFIG.payment.detail}/${id}`);
-  },
 };
 
 /**
@@ -103,15 +79,19 @@ export const businessApi = {
   },
 
   /**
-   * 获取业务列表
+   * 获取保险订单列表
    * @param {Object} params 查询参数
    */
-  getBusinessList(params = {}) {
+  getOrderList(params = {}) {
     return request.get(API_CONFIG.business.list, params);
   },
   // 获取详情
   getOrderDetail(params) {
     return request.get(API_CONFIG.business.detail, params);
+  },
+  // 删除订单
+  deleteOrder(id) {
+    return request.delete(API_CONFIG.business.delete + "?id=" + id);
   },
 };
 

@@ -155,16 +155,16 @@ export default {
       title: "首页",
     };
   },
-  onLoad() {
-    if (Auth.isLoggedIn()) {
-      api.user.getProfile().then((res) => {
-        console.log(res);
-        if (res.code == 0) {
-          Auth.setUserInfo(res.data);
-        }
-      });
-    }
-  },
+  // onLoad() {
+  //   if (Auth.isLoggedIn()) {
+  //     api.user.getProfile().then((res) => {
+  //       console.log(res);
+  //       if (res.code == 0) {
+  //         Auth.setUserInfo(res.data);
+  //       }
+  //     });
+  //   }
+  // },
   methods: {
     navigateTo(url) {
       // 检查是否已登录
@@ -176,10 +176,22 @@ export default {
         return;
       }
 
-      // 已登录，正常跳转
-      uni.navigateTo({
-        url: url,
-      });
+      // 已登录，先获取个人信息保存后再跳转
+      api.user
+        .getProfile()
+        .then((res) => {
+          console.log(res);
+          if (res.code == 0) {
+            Auth.setUserInfo(res.data);
+            // 获取信息后进行跳转
+            uni.navigateTo({
+              url: url,
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("获取用户信息失败:", error);
+        });
     },
   },
 };
@@ -224,14 +236,14 @@ export default {
   width: 100%;
   height: 80rpx;
   line-height: 80rpx;
-  background-color: #007aff;
+  background-color: #2b8dbc;
   color: white;
   border-radius: 10rpx;
   font-size: 28rpx;
 }
 
 .nav-btn:active {
-  background-color: #0056b3;
+  background-color: #2b8dbc;
 }
 
 /* 新增的保障说明样式 */
@@ -245,7 +257,7 @@ export default {
   text-align: center;
   margin-bottom: 40rpx;
   padding: 30rpx 0;
-  background: linear-gradient(135deg, #007aff, #0056b3);
+  background: linear-gradient(135deg, #2b8dbc, #0056b3);
   border-radius: 20rpx;
 }
 
@@ -269,7 +281,7 @@ export default {
   color: #333;
   margin-bottom: 20rpx;
   padding-bottom: 10rpx;
-  border-bottom: 2rpx solid #007aff;
+  border-bottom: 2rpx solid #2b8dbc;
 }
 
 .item {
@@ -292,7 +304,7 @@ export default {
 .item-amount {
   font-size: 28rpx;
   font-weight: bold;
-  color: #007aff;
+  color: #2b8dbc;
 }
 
 .special-note {
@@ -367,7 +379,7 @@ export default {
 
 .claim-value {
   font-size: 26rpx;
-  color: #007aff;
+  color: #2b8dbc;
   font-weight: bold;
 }
 
@@ -401,12 +413,12 @@ export default {
 }
 
 .payment-btn {
-  background-color: #007aff;
+  background-color: #2b8dbc;
   color: white;
 }
 
 .payment-btn:active {
-  background-color: #0056b3;
+  background-color: #2b8dbc;
 }
 
 .personal-btn {

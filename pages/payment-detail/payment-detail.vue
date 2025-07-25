@@ -1,107 +1,132 @@
 <template>
   <view class="payment-detail-container">
-    <!-- 头部 -->
-    <view class="header">
-      <view class="back-btn" @click="goBack">
-        <text class="back-icon">←</text>
-      </view>
-      <text class="title">缴费详情</text>
+    <!-- 加载状态 -->
+    <view v-if="loading" class="loading">
+      <text>加载中...</text>
     </view>
 
-    <!-- 缴费状态卡片 -->
-    <view class="status-card">
-      <view class="status-icon" :class="paymentDetail.status">
-        <text v-if="paymentDetail.status === 'paid'">✓</text>
-        <text v-else-if="paymentDetail.status === 'unpaid'">⏳</text>
-        <text v-else>✗</text>
+    <!-- 订单详情内容 -->
+    <view v-else-if="orderDetail">
+      <!-- 支付状态卡片 -->
+      <view class="status-card">
+        <view
+          class="status-icon"
+          :class="getStatusClass(orderDetail.payStatus)"
+        >
+          <text v-if="orderDetail.payStatus === 2">✓</text>
+          <text v-else-if="orderDetail.payStatus === 1">⏳</text>
+          <text v-else-if="orderDetail.payStatus === 3">🔄</text>
+          <text v-else-if="orderDetail.payStatus === 4">↩</text>
+          <text v-else>✗</text>
+        </view>
+        <text class="status-text">{{
+          getStatusText(orderDetail.payStatus)
+        }}</text>
+        <text class="amount">¥{{ orderDetail.payPrice }}</text>
       </view>
-      <text class="status-text">{{ getStatusText(paymentDetail.status) }}</text>
-      <text class="amount">¥{{ formatAmount(paymentDetail.amount) }}</text>
-    </view>
 
-    <!-- 缴费信息 -->
-    <view class="info-section">
-      <view class="section-title">缴费信息</view>
-      <view class="info-list">
-        <view class="info-item">
-          <text class="label">缴费项目</text>
-          <text class="value">{{ paymentDetail.title }}</text>
-        </view>
-        <view class="info-item">
-          <text class="label">缴费金额</text>
-          <text class="value amount-text"
-            >¥{{ formatAmount(paymentDetail.amount) }}</text
-          >
-        </view>
-        <view class="info-item">
-          <text class="label">订单号</text>
-          <text class="value order-no">{{ paymentDetail.orderNo }}</text>
-        </view>
-        <view class="info-item">
-          <text class="label">缴费时间</text>
-          <text class="value">{{ formatDate(paymentDetail.paymentTime) }}</text>
-        </view>
-        <view class="info-item">
-          <text class="label">缴费方式</text>
-          <text class="value">{{
-            paymentDetail.paymentMethod || "微信支付"
-          }}</text>
-        </view>
-        <view class="info-item">
-          <text class="label">备注</text>
-          <text class="value">{{ paymentDetail.description || "无" }}</text>
+      <!-- 投保人信息 -->
+      <view class="info-section">
+        <view class="section-title">投保人信息</view>
+        <view class="info-list">
+          <view class="info-item">
+            <text class="label">姓名</text>
+            <text class="value">{{ orderDetail.tbName || "-" }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">身份证号</text>
+            <text class="value">{{ formatIdCard(orderDetail.tbIdCard) }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">手机号</text>
+            <text class="value">{{ orderDetail.tbPhone || "-" }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">住址</text>
+            <text class="value">{{ orderDetail.tbAddress || "-" }}</text>
+          </view>
         </view>
       </view>
-    </view>
 
-    <!-- 操作按钮 -->
-    <view class="action-section" v-if="paymentDetail.status === 'unpaid'">
-      <button class="pay-btn" @click="goToPay">立即缴费</button>
-    </view>
-
-    <!-- 缴费记录 -->
-    <view class="record-section" v-if="paymentDetail.status === 'paid'">
-      <view class="section-title">缴费记录</view>
-      <view class="record-item">
-        <view class="record-header">
-          <text class="record-title">支付成功</text>
-          <text class="record-time">{{
-            formatDate(paymentDetail.paymentTime)
-          }}</text>
-        </view>
-        <view class="record-detail">
-          <text class="detail-text"
-            >支付方式：{{ paymentDetail.paymentMethod || "微信支付" }}</text
-          >
-          <text class="detail-text"
-            >交易流水：{{ paymentDetail.transactionId || "暂无" }}</text
-          >
+      <!-- 被保人信息 -->
+      <view class="info-section">
+        <view class="section-title">被保人信息</view>
+        <view class="info-list">
+          <view class="info-item">
+            <text class="label">姓名</text>
+            <text class="value">{{ orderDetail.bbName || "-" }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">身份证号</text>
+            <text class="value">{{ formatIdCard(orderDetail.bbIdCard) }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">手机号</text>
+            <text class="value">{{ orderDetail.bbPhone || "-" }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">住址</text>
+            <text class="value">{{ orderDetail.bbAddress || "-" }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">学校</text>
+            <text class="value">{{ orderDetail.bbSchool || "-" }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">班级</text>
+            <text class="value">{{ orderDetail.bbClass || "-" }}</text>
+          </view>
         </view>
       </view>
+
+      <!-- 支付信息 -->
+      <view class="info-section">
+        <view class="section-title">支付信息</view>
+        <view class="info-list">
+          <view class="info-item">
+            <text class="label">支付金额</text>
+            <text class="value amount-text">¥{{ orderDetail.payPrice }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">支付时间</text>
+            <text class="value">{{ formatDate(orderDetail.payTime) }}</text>
+          </view>
+          <view class="info-item">
+            <text class="label">支付状态</text>
+            <text
+              class="value"
+              :class="getStatusClass(orderDetail.payStatus)"
+              >{{ getStatusText(orderDetail.payStatus) }}</text
+            >
+          </view>
+        </view>
+      </view>
+
+      <!-- 操作按钮 - 只有待支付时显示 -->
+      <view class="action-section" v-if="orderDetail.payStatus === 1">
+        <button class="pay-btn" @click="goToPay">支付订单</button>
+        <button class="delete-btn" @click="deleteOrder">删除订单</button>
+      </view>
+    </view>
+
+    <!-- 错误状态 -->
+    <view v-else class="error-state">
+      <text>订单信息加载失败</text>
     </view>
   </view>
 </template>
 
 <script>
 import { formatAmount } from "@/utils/payment.js";
+import { businessApi } from "@/utils/api.js";
 
 export default {
   name: "PaymentDetail",
   data() {
     return {
-      recordId: null,
-      orderNo: "",
-      paymentDetail: {
-        id: null,
-        title: "",
-        amount: 0,
-        status: "unpaid",
-        paymentTime: null,
-        orderNo: "",
-        description: "",
-        paymentMethod: "微信支付",
-        transactionId: "",
-      },
+      orderId: null,
+      orderDetail: null,
+      loading: true,
     };
   },
   methods: {
@@ -113,15 +138,26 @@ export default {
 
     getStatusText(status) {
       const statusMap = {
-        paid: "缴费成功",
-        unpaid: "待缴费",
-        failed: "缴费失败",
+        1: "待支付",
+        2: "已支付",
+        3: "申请退款",
+        4: "已退款",
       };
       return statusMap[status] || "未知状态";
     },
 
+    getStatusClass(status) {
+      const classMap = {
+        1: "unpaid",
+        2: "paid",
+        3: "refunding",
+        4: "refunded",
+      };
+      return classMap[status] || "unknown";
+    },
+
     formatDate(dateString) {
-      if (!dateString) return "待缴费";
+      if (!dateString) return "待支付";
       const date = new Date(dateString);
       return date.toLocaleString("zh-CN", {
         year: "numeric",
@@ -133,94 +169,93 @@ export default {
       });
     },
 
+    formatIdCard(idCard) {
+      if (!idCard) return "-";
+      // 身份证号脱敏处理
+      if (idCard.length >= 10) {
+        return (
+          idCard.substring(0, 6) + "****" + idCard.substring(idCard.length - 4)
+        );
+      }
+      return idCard;
+    },
+
     goToPay() {
-      // 跳转到缴费页面
-      uni.navigateTo({
-        url: `/pages/payment/payment?orderNo=${this.orderNo}&amount=${this.paymentDetail.amount}&title=${this.paymentDetail.title}`,
+      // 构建支付页面参数
+      const paymentParams = {
+        id: this.orderId,
+      };
+
+      // 跳转到支付页面
+      const queryString = Object.keys(paymentParams)
+        .map((key) => `${key}=${encodeURIComponent(paymentParams[key])}`)
+        .join("&");
+      uni.redirectTo({
+        url: `/pages/payment/payment?${queryString}`,
       });
     },
 
-    loadPaymentDetail() {
-      // 模拟数据 - 实际应该从API获取
-      const mockData = {
-        1: {
-          id: 1,
-          title: "2024年春季学费",
-          amount: 500000,
-          status: "paid",
-          paymentTime: "2024-03-15 14:30:25",
-          orderNo: "PAY202403150001",
-          description: "2024年春季学期学费缴纳",
-          paymentMethod: "微信支付",
-          transactionId: "WX20240315143025001",
-        },
-        2: {
-          id: 2,
-          title: "2024年住宿费",
-          amount: 300000,
-          status: "paid",
-          paymentTime: "2024-02-28 09:15:10",
-          orderNo: "PAY202402280002",
-          description: "2024年春季学期住宿费",
-          paymentMethod: "微信支付",
-          transactionId: "WX20240228091510002",
-        },
-        3: {
-          id: 3,
-          title: "2024年秋季学费",
-          amount: 500000,
-          status: "unpaid",
-          paymentTime: null,
-          orderNo: "PAY202409010003",
-          description: "2024年秋季学期学费",
-          paymentMethod: "微信支付",
-          transactionId: "",
-        },
-        4: {
-          id: 4,
-          title: "教材费",
-          amount: 80000,
-          status: "paid",
-          paymentTime: "2024-03-10 16:45:30",
-          orderNo: "PAY202403100004",
-          description: "2024年春季教材费用",
-          paymentMethod: "微信支付",
-          transactionId: "WX20240310164530004",
-        },
-        5: {
-          id: 5,
-          title: "实验费",
-          amount: 120000,
-          status: "unpaid",
-          paymentTime: null,
-          orderNo: "PAY202403200005",
-          description: "2024年春季实验课程费用",
-          paymentMethod: "微信支付",
-          transactionId: "",
-        },
-      };
+    async deleteOrder() {
+      try {
+        const result = await uni.showModal({
+          title: "确认删除",
+          content: "确定要删除这个订单吗？",
+          confirmText: "删除",
+          cancelText: "取消",
+        });
 
-      // 根据ID或订单号获取详情
-      let detail = null;
-      if (this.recordId && mockData[this.recordId]) {
-        detail = mockData[this.recordId];
-      } else {
-        // 根据订单号查找
-        for (const key in mockData) {
-          if (mockData[key].orderNo === this.orderNo) {
-            detail = mockData[key];
-            break;
-          }
+        if (result.confirm) {
+          uni.showLoading({ title: "删除中..." });
+
+          await businessApi.deleteOrder(this.orderId);
+
+          uni.hideLoading();
+          uni.showToast({
+            title: "删除成功",
+            icon: "success",
+          });
+
+          // 延迟返回上一页
+          setTimeout(() => {
+            uni.navigateBack();
+          }, 1500);
         }
-      }
-
-      if (detail) {
-        this.paymentDetail = { ...detail };
-      } else {
+      } catch (error) {
+        console.error("删除订单失败:", error);
+        uni.hideLoading();
         uni.showToast({
-          title: "未找到缴费记录",
+          title: "删除失败，请重试",
           icon: "none",
         });
+      }
+    },
+
+    async loadOrderDetail() {
+      if (!this.orderId) {
+        uni.showToast({
+          title: "订单ID不能为空",
+          icon: "none",
+        });
+        return;
+      }
+
+      try {
+        this.loading = true;
+        const response = await businessApi.getOrderDetail({ id: this.orderId });
+
+        if (response && response.data) {
+          this.orderDetail = response.data;
+        } else {
+          throw new Error("获取订单详情失败");
+        }
+      } catch (error) {
+        console.error("加载订单详情失败:", error);
+        uni.showToast({
+          title: "加载失败，请重试",
+          icon: "none",
+        });
+      } finally {
+        this.loading = false;
       }
     },
   },
@@ -228,14 +263,23 @@ export default {
   onLoad(options) {
     // 接收页面参数
     if (options.id) {
-      this.recordId = parseInt(options.id);
+      this.orderId = parseInt(options.id);
+      // 加载订单详情
+      this.loadOrderDetail();
+    } else {
+      uni.showToast({
+        title: "订单ID不能为空",
+        icon: "none",
+      });
+      this.loading = false;
     }
-    if (options.orderNo) {
-      this.orderNo = options.orderNo;
-    }
+  },
 
-    // 加载缴费详情
-    this.loadPaymentDetail();
+  // 页面显示时刷新数据
+  onShow() {
+    if (this.orderId) {
+      this.loadOrderDetail();
+    }
   },
 };
 </script>
@@ -276,6 +320,18 @@ export default {
   color: #333;
 }
 
+.loading {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+}
+
+.error-state {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+}
+
 .status-card {
   background-color: #fff;
   border-radius: 20rpx;
@@ -302,11 +358,19 @@ export default {
 }
 
 .status-icon.unpaid {
-  background-color: #fa8c16;
+  background-color: #e09801;
 }
 
-.status-icon.failed {
-  background-color: #ff4d4f;
+.status-icon.refunding {
+  background-color: #2b8dbc;
+}
+
+.status-icon.refunded {
+  background-color: #722ed1;
+}
+
+.status-icon.unknown {
+  background-color: #d9d9d9;
 }
 
 .status-text {
@@ -323,8 +387,7 @@ export default {
   color: #ff6b35;
 }
 
-.info-section,
-.record-section {
+.info-section {
   background-color: #fff;
   border-radius: 20rpx;
   padding: 40rpx;
@@ -360,6 +423,7 @@ export default {
 .label {
   color: #666;
   font-size: 28rpx;
+  min-width: 120rpx;
 }
 
 .value {
@@ -367,6 +431,7 @@ export default {
   font-size: 28rpx;
   text-align: right;
   max-width: 60%;
+  word-break: break-all;
 }
 
 .amount-text {
@@ -374,62 +439,62 @@ export default {
   font-weight: bold;
 }
 
-.order-no {
-  font-family: monospace;
-  color: #999;
+.value.paid {
+  color: #52c41a;
+}
+
+.value.unpaid {
+  color: #e09801;
+}
+
+.value.refunding {
+  color: #2b8dbc;
+}
+
+.value.refunded {
+  color: #722ed1;
 }
 
 .action-section {
   padding: 40rpx 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
 }
 
 .pay-btn {
   width: 100%;
   height: 100rpx;
-  background-color: #007aff;
+  background-color: #2b8dbc;
   color: #fff;
   border-radius: 50rpx;
   font-size: 32rpx;
   font-weight: bold;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pay-btn:active {
-  background-color: #0056cc;
+  background-color: #2b8dbc;
 }
 
-.record-item {
-  background-color: #f8f8f8;
-  border-radius: 16rpx;
-  padding: 30rpx;
-}
-
-.record-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20rpx;
-}
-
-.record-title {
-  font-size: 28rpx;
+.delete-btn {
+  width: 100%;
+  height: 100rpx;
+  background-color: #c51d34;
+  color: #fff;
+  border-radius: 50rpx;
+  font-size: 32rpx;
   font-weight: bold;
-  color: #52c41a;
-}
-
-.record-time {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.record-detail {
+  border: none;
   display: flex;
-  flex-direction: column;
-  gap: 10rpx;
+  align-items: center;
+  justify-content: center;
 }
 
-.detail-text {
-  font-size: 26rpx;
-  color: #666;
+.delete-btn:active {
+  background-color: #c51d34;
 }
 </style>

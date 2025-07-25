@@ -5,9 +5,9 @@
     "pages/login/login",
     "pages/form/form",
     "pages/payment/payment",
-    "pages/payment-success/payment-success",
     "pages/payment-record/payment-record",
-    "pages/payment-detail/payment-detail"
+    "pages/payment-detail/payment-detail",
+    "pages/privacy/privacy"
   ],
   "window": {
     "navigationBarTextStyle": "black",

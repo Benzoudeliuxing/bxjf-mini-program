@@ -15,29 +15,25 @@
         <text class="label">订单号：</text>
         <text class="value">{{ orderInfo.orderNo }}</text>
       </view>
-      <view class="order-item">
+      <view class="order-item" v-if="false">
         <text class="label">商品名称：</text>
         <text class="value">{{ orderInfo.productName }}</text>
       </view>
-      <view class="order-item">
+      <view class="order-item" v-if="false">
         <text class="label">保险类型：</text>
         <text class="value">学生意外伤害保险</text>
       </view>
-      <view class="order-item">
+      <view class="order-item" v-if="false">
         <text class="label">保险期限：</text>
         <text class="value">1年</text>
       </view>
       <view class="order-item">
         <text class="label">订单金额：</text>
-        <text class="value price"
-          >¥{{ (orderInfo.amount / 100).toFixed(2) }}</text
-        >
+        <text class="value price">¥{{ orderInfo.payPrice }}</text>
       </view>
       <view class="order-item total-amount">
         <text class="label">应付金额：</text>
-        <text class="value price total"
-          >¥{{ (orderInfo.payPrice / 100).toFixed(2) }}</text
-        >
+        <text class="value price total">¥{{ orderInfo.payPrice }}</text>
       </view>
     </view>
 
@@ -140,7 +136,7 @@
     </view>
 
     <!-- 支付说明 -->
-    <view class="payment-tips" v-if="orderInfo.payStatus === 1">
+    <view class="payment-tips" v-if="false">
       <text class="tips-text">支付说明：</text>
       <text class="tips-content">1. 请确保微信已安装并已登录</text>
       <text class="tips-content">2. 支付完成后请勿关闭小程序</text>

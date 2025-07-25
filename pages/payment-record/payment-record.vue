@@ -1,22 +1,7 @@
 <template>
   <view class="payment-record-container">
-    <!-- 头部 -->
-    <view class="header">
-      <text class="title">缴费记录</text>
-    </view>
-
     <!-- 搜索和筛选 -->
     <view class="search-filter">
-      <view class="search-box">
-        <input
-          class="search-input"
-          placeholder="搜索缴费记录"
-          v-model="searchKeyword"
-          @input="onSearchInput"
-        />
-        <text class="search-icon">🔍</text>
-      </view>
-
       <view class="filter-tabs">
         <view
           class="filter-tab"
@@ -27,17 +12,17 @@
         </view>
         <view
           class="filter-tab"
-          :class="{ active: currentStatus === 'paid' }"
-          @click="filterByStatus('paid')"
+          :class="{ active: currentStatus === '1' }"
+          @click="filterByStatus('1')"
         >
-          已缴费
+          待支付
         </view>
         <view
           class="filter-tab"
-          :class="{ active: currentStatus === 'unpaid' }"
-          @click="filterByStatus('unpaid')"
+          :class="{ active: currentStatus === '2' }"
+          @click="filterByStatus('2')"
         >
-          未缴费
+          已支付
         </view>
       </view>
     </view>
@@ -51,24 +36,26 @@
         @click="goToDetail(record)"
       >
         <view class="record-header">
-          <text class="record-title">{{ record.title }}</text>
-          <text class="record-status" :class="record.status">
-            {{ getStatusText(record.status) }}
+          <text class="record-title">{{
+            record.title || record.name || "保险订单"
+          }}</text>
+          <text class="record-status" :class="getStatusClass(record.payStatus)">
+            {{ getStatusText(record.payStatus) }}
           </text>
         </view>
 
         <view class="record-info">
           <view class="info-row">
             <text class="label">缴费金额：</text>
-            <text class="amount">¥{{ formatAmount(record.amount) }}</text>
+            <text class="amount">¥{{ record.payPrice }}</text>
           </view>
           <view class="info-row">
             <text class="label">缴费时间：</text>
-            <text class="time">{{ formatDate(record.paymentTime) }}</text>
+            <text class="time">{{ record.payTime || "-" }}</text>
           </view>
           <view class="info-row">
             <text class="label">订单号：</text>
-            <text class="order-no">{{ record.orderNo }}</text>
+            <text class="order-no">{{ record.orderNo || "-" }}</text>
           </view>
         </view>
 
@@ -88,111 +75,74 @@
 
 <script>
 import { formatAmount } from "@/utils/payment.js";
+import { businessApi } from "@/utils/api.js";
 
 export default {
   name: "PaymentRecord",
   data() {
     return {
       searchKeyword: "",
-      currentStatus: "",
-      records: [
-        {
-          id: 1,
-          title: "2024年春季学费",
-          amount: 500000, // 5000元，以分为单位
-          status: "paid",
-          paymentTime: "2024-03-15 14:30:25",
-          orderNo: "PAY202403150001",
-          description: "2024年春季学期学费缴纳",
-        },
-        {
-          id: 2,
-          title: "2024年住宿费",
-          amount: 300000, // 3000元
-          status: "paid",
-          paymentTime: "2024-02-28 09:15:10",
-          orderNo: "PAY202402280002",
-          description: "2024年春季学期住宿费",
-        },
-        {
-          id: 3,
-          title: "2024年秋季学费",
-          amount: 500000, // 5000元
-          status: "unpaid",
-          paymentTime: null,
-          orderNo: "PAY202409010003",
-          description: "2024年秋季学期学费",
-        },
-        {
-          id: 4,
-          title: "教材费",
-          amount: 80000, // 800元
-          status: "paid",
-          paymentTime: "2024-03-10 16:45:30",
-          orderNo: "PAY202403100004",
-          description: "2024年春季教材费用",
-        },
-        {
-          id: 5,
-          title: "实验费",
-          amount: 120000, // 1200元
-          status: "unpaid",
-          paymentTime: null,
-          orderNo: "PAY202403200005",
-          description: "2024年春季实验课程费用",
-        },
-      ],
+      currentStatus: "", // 空字符串表示全部，1-待支付，2-已支付
+      records: [],
+      loading: false,
+      pageNo: 1,
+      pageSize: 10,
+      hasMore: true,
     };
   },
   computed: {
     filteredRecords() {
       let filtered = this.records;
 
-      // 按状态筛选
-      if (this.currentStatus) {
-        filtered = filtered.filter(
-          (record) => record.status === this.currentStatus
-        );
-      }
-
       // 按关键词搜索
       if (this.searchKeyword) {
         const keyword = this.searchKeyword.toLowerCase();
         filtered = filtered.filter(
           (record) =>
-            record.title.toLowerCase().includes(keyword) ||
-            record.orderNo.toLowerCase().includes(keyword) ||
-            record.description.toLowerCase().includes(keyword)
+            (record.title && record.title.toLowerCase().includes(keyword)) ||
+            (record.orderNo &&
+              record.orderNo.toLowerCase().includes(keyword)) ||
+            (record.description &&
+              record.description.toLowerCase().includes(keyword))
         );
       }
 
-      // 按时间倒序排列
-      return filtered.sort((a, b) => {
-        if (a.paymentTime && b.paymentTime) {
-          return new Date(b.paymentTime) - new Date(a.paymentTime);
-        }
-        return 0;
-      });
+      return filtered;
     },
   },
   methods: {
     formatAmount,
 
     onSearchInput() {
-      // 搜索输入处理
+      // 搜索输入处理，可以添加防抖逻辑
     },
 
-    filterByStatus(status) {
+    async filterByStatus(status) {
       this.currentStatus = status;
+      this.pageNo = 1;
+      this.records = [];
+      this.hasMore = true;
+      await this.loadPaymentRecords();
     },
 
-    getStatusText(status) {
+    getStatusText(payStatus) {
       const statusMap = {
-        paid: "已缴费",
-        unpaid: "未缴费",
-        failed: "缴费失败",
+        1: "待支付",
+        2: "已支付",
+        3: "申请退款",
+        4: "已退款",
       };
-      return statusMap[status] || "未知状态";
+      return statusMap[payStatus] || "未知状态";
+    },
+
+    getStatusClass(payStatus) {
+      const classMap = {
+        1: "unpaid",
+        2: "paid",
+        3: "refunding",
+        4: "refunded",
+      };
+      return classMap[payStatus] || "";
     },
 
     formatDate(dateString) {
@@ -209,24 +159,81 @@ export default {
 
     goToDetail(record) {
       uni.navigateTo({
-        url: `/pages/payment-detail/payment-detail?id=${record.id}&orderNo=${record.orderNo}`,
+        url: `/pages/payment-detail/payment-detail?id=${record.id}&orderNo=${
+          record.orderNo || record.orderNumber
+        }`,
       });
     },
-    loadPaymentRecords() {
-      // 这里可以调用API获取真实的缴费记录数据
-      // 目前使用模拟数据
-      console.log("加载缴费记录");
+
+    async loadPaymentRecords() {
+      if (this.loading || !this.hasMore) return;
+
+      this.loading = true;
+
+      try {
+        const params = {
+          pageNo: this.pageNo,
+          pageSize: this.pageSize,
+        };
+
+        // 如果有选择支付状态，添加到参数中
+        if (this.currentStatus) {
+          params.payStatus = this.currentStatus;
+        }
+
+        const response = await businessApi.getOrderList(params);
+
+        if (response && response.data) {
+          const newRecords = response.data.list || response.data || [];
+
+          if (this.pageNo === 1) {
+            this.records = newRecords;
+          } else {
+            this.records = [...this.records, ...newRecords];
+          }
+
+          // 判断是否还有更多数据
+          this.hasMore = newRecords.length === this.pageSize;
+
+          if (this.hasMore) {
+            this.pageNo++;
+          }
+        }
+      } catch (error) {
+        console.error("获取订单列表失败:", error);
+        uni.showToast({
+          title: "获取数据失败",
+          icon: "none",
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // 加载更多数据
+    async loadMore() {
+      if (!this.loading && this.hasMore) {
+        await this.loadPaymentRecords();
+      }
     },
   },
 
-  onLoad() {
+  async onLoad() {
     // 页面加载时获取缴费记录
-    this.loadPaymentRecords();
+    await this.loadPaymentRecords();
   },
 
-  onShow() {
-    // 页面显示时刷新数据
-    this.loadPaymentRecords();
+  async onShow() {
+    // 页面显示时刷新数据，重置到第一页
+    this.pageNo = 1;
+    this.records = [];
+    this.hasMore = true;
+    await this.loadPaymentRecords();
+  },
+
+  // 页面触底事件
+  onReachBottom() {
+    this.loadMore();
   },
 };
 </script>
@@ -301,7 +308,7 @@ export default {
 }
 
 .filter-tab.active {
-  background-color: #007aff;
+  background-color: #2b8dbc;
   color: #fff;
 }
 
@@ -351,12 +358,22 @@ export default {
 
 .record-status.unpaid {
   background-color: #fff7e6;
-  color: #fa8c16;
+  color: #e09801;
 }
 
 .record-status.failed {
   background-color: #fff2f0;
-  color: #ff4d4f;
+  color: #c51d34;
+}
+
+.record-status.refunding {
+  background-color: #fff7e6;
+  color: #e09801;
+}
+
+.record-status.refunded {
+  background-color: #f6ffed;
+  color: #52c41a;
 }
 
 .record-info {
@@ -375,7 +392,7 @@ export default {
 }
 
 .amount {
-  color: #ff6b35;
+  color: #c51d34;
   font-weight: bold;
 }
 
@@ -395,7 +412,7 @@ export default {
 }
 
 .detail-text {
-  color: #007aff;
+  color: #2b8dbc;
   font-size: 26rpx;
 }
 

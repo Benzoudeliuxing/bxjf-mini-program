@@ -89,8 +89,9 @@ const API_CONFIG = {
   // 其他业务接口
   business: {
     form: "/app-api/bxgm/order/create",
-    list: "/app-api/bxgm/order/list",
+    list: "/app-api/bxgm/order/page",
     detail: "/app-api/bxgm/order/get",
+    delete: "/app-api/bxgm/order/delete",
   },
 };
 

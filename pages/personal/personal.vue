@@ -4,13 +4,14 @@
     <view class="user-info-section">
       <view class="user-avatar">
         <image
-          :src="userInfo.avatarUrl || '/static/logo.png'"
+          :src="userInfo.avatarUrl || '/static/logo.jpg'"
           mode="aspectFill"
           class="avatar-img"
         ></image>
       </view>
       <view class="user-details">
         <text class="user-name">{{ userInfo.nickname || "未设置昵称" }}</text>
+        <text class="user-mobile">{{ userInfo.mobile || "未绑定手机号" }}</text>
         <text class="user-desc">{{
           userInfo.nickname ? "已登录" : "请先登录"
         }}</text>
@@ -32,7 +33,11 @@
 
     <!-- 功能菜单 -->
     <view class="menu-section">
-      <view class="menu-item" @click="handleMenuClick('about')">
+      <view class="menu-item" @click="handleMenuClick('order')">
+        <text class="menu-text">保险订单记录</text>
+        <text class="menu-arrow">></text>
+      </view>
+      <!-- <view class="menu-item" @click="handleMenuClick('about')">
         <view class="menu-icon">ℹ️</view>
         <text class="menu-text">关于我们</text>
         <text class="menu-arrow">></text>
@@ -42,7 +47,7 @@
         <view class="menu-icon">💬</view>
         <text class="menu-text">意见反馈</text>
         <text class="menu-arrow">></text>
-      </view>
+      </view> -->
     </view>
 
     <!-- 版本信息 -->
@@ -101,6 +106,11 @@ export default {
       }
 
       switch (type) {
+        case "order":
+          uni.navigateTo({
+            url: "/pages/payment-record/payment-record",
+          });
+          break;
         case "about":
           uni.showModal({
             title: "关于我们",
@@ -133,16 +143,17 @@ export default {
 <style scoped>
 .personal-container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: #f8f6f3;
 }
 
 /* 用户信息区域 */
 .user-info-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #a5834e 0%, #247b3f 100%);
   padding: 60rpx 40rpx;
   display: flex;
   align-items: center;
   color: #ffffff;
+  box-shadow: 0 4rpx 20rpx rgba(165, 131, 78, 0.3);
 }
 
 .user-avatar {
@@ -153,7 +164,8 @@ export default {
   width: 120rpx;
   height: 120rpx;
   border-radius: 60rpx;
-  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  border: 4rpx solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
 }
 
 .user-details {
@@ -165,11 +177,19 @@ export default {
   font-weight: bold;
   display: block;
   margin-bottom: 10rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
+}
+
+.user-mobile {
+  font-size: 28rpx;
+  color: rgba(255, 255, 255, 0.9);
+  display: block;
+  margin-bottom: 6rpx;
 }
 
 .user-desc {
   font-size: 24rpx;
-  opacity: 0.8;
+  opacity: 0.85;
   display: block;
 }
 
@@ -179,16 +199,26 @@ export default {
 
 .login-btn,
 .logout-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  border: 2rpx solid rgba(255, 255, 255, 0.4);
   border-radius: 30rpx;
   font-size: 24rpx;
   padding: 10rpx 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.login-btn:active {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .logout-btn {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(43, 141, 188, 0.3);
+  border-color: rgba(43, 141, 188, 0.5);
+}
+
+.logout-btn:active {
+  background: rgba(43, 141, 188, 0.4);
 }
 
 /* 功能菜单 */
@@ -197,14 +227,17 @@ export default {
   margin: 20rpx;
   border-radius: 20rpx;
   overflow: hidden;
+  box-shadow: 0 2rpx 16rpx rgba(165, 131, 78, 0.08);
+  border: 1rpx solid rgba(165, 131, 78, 0.1);
 }
 
 .menu-item {
   display: flex;
   align-items: center;
   padding: 30rpx 40rpx;
-  border-bottom: 1rpx solid #f0f0f0;
-  transition: background-color 0.3s;
+  border-bottom: 1rpx solid rgba(165, 131, 78, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 .menu-item:last-child {
@@ -212,7 +245,28 @@ export default {
 }
 
 .menu-item:active {
-  background-color: #f8f8f8;
+  background: linear-gradient(
+    90deg,
+    rgba(165, 131, 78, 0.05) 0%,
+    rgba(36, 123, 63, 0.05) 100%
+  );
+  transform: translateX(4rpx);
+}
+
+.menu-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 6rpx;
+  background: linear-gradient(180deg, #a5834e 0%, #247b3f 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menu-item:active::before {
+  opacity: 1;
 }
 
 .menu-icon {
@@ -220,17 +274,20 @@ export default {
   margin-right: 30rpx;
   width: 40rpx;
   text-align: center;
+  color: #a5834e;
 }
 
 .menu-text {
   flex: 1;
   font-size: 32rpx;
-  color: #333333;
+  color: #2c2c2c;
+  font-weight: 500;
 }
 
 .menu-arrow {
   font-size: 32rpx;
-  color: #cccccc;
+  color: #2b8dbc;
+  font-weight: bold;
 }
 
 /* 版本信息 */
@@ -241,6 +298,7 @@ export default {
 
 .version-text {
   font-size: 24rpx;
-  color: #999999;
+  color: rgba(165, 131, 78, 0.6);
+  font-weight: 400;
 }
 </style>

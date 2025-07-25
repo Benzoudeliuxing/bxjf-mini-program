@@ -159,7 +159,7 @@ class Auth {
     // 跳转到登录页
     setTimeout(() => {
       uni.reLaunch({
-        url: "/pages/login/login",
+        url: "/pages/index/index",
       });
     }, 1500);
   }
